@@ -19,7 +19,7 @@ var (
 
 type nativeCodeService struct {
 	contract  code.Contract
-	rpcClient *grpc.ClientConn
+	rpcClient grpc.ClientConnInterface
 	lastping  time.Time
 }
 
@@ -28,12 +28,15 @@ func newNativeCodeService(chainAddr string, contract code.Contract) *nativeCodeS
 	if err != nil {
 		panic(err)
 	}
+	var conn grpc.ClientConnInterface
 	switch uri.Scheme {
 	case "tcp":
+		conn, err = grpc.Dial(uri.Host, grpc.WithInsecure())
+	case "unix":
+		conn, err = grpc.Dial("unix:///home/chenfengjin/xupercore/bcs/contract/native/xchain.sock", grpc.WithInsecure())
 	default:
 		panic("unsupported protocol " + uri.Scheme)
 	}
-	conn, err := grpc.Dial(uri.Host, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}

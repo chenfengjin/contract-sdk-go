@@ -1,6 +1,7 @@
 package native
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -32,6 +33,9 @@ func (d *driver) Serve(contract code.Contract) {
 	chainAddr := os.Getenv(xchainChainAddr)
 	codePort := os.Getenv(xchainCodePort)
 
+	fmt.Println("chainAddr:", chainAddr)
+	fmt.Println("codePort:", codePort)
+
 	if chainAddr == "" {
 		panic("empty XCHAIN_CHAIN_ADDR env")
 	}
@@ -45,11 +49,11 @@ func (d *driver) Serve(contract code.Contract) {
 	pbrpc.RegisterNativeCodeServer(rpcServer, nativeCodeService)
 
 	var listener net.Listener
-	listener, err := net.Listen("tcp", "127.0.0.1:"+codePort)
+	// listener, err := net.Listen("tcp", "0.0.0.0:"+codePort)
+	listener, err := net.Listen("unix", "/home/chenfengjin/xupercore/bcs/contract/native/xchain_code.sock")
 	if err != nil {
 		panic(err)
 	}
-
 	go rpcServer.Serve(listener)
 
 	sigch := make(chan os.Signal, 2)
